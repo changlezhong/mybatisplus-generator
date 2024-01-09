@@ -23,7 +23,6 @@ public class CodeGenerator {
      */
     private static final DataSourceConfig DATA_SOURCE_CONFIG = new DataSourceConfig
             .Builder("jdbc:mysql://localhost:3306/mybatis_plus", "root", "Nriet@123")
-            .schema("mybatis_plus")
             .build();
 
     /**
