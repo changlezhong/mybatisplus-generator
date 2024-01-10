@@ -2,13 +2,25 @@ package com.time.trip.mybatisplus.infrastructure.generator;
 
 import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.config.*;
+import com.baomidou.mybatisplus.generator.config.builder.Entity;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
+import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
+import com.time.trip.mybatisplus.infrastructure.BaseEntity;
 
 public class CodeGenerator {
 
     public static void main(String[] args) {
+        // 初始化数据源
         AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
+        // 全局配置
         generator.global(globalConfig().build());
+        // 包配置
+        generator.packageInfo(packageConfig().build());
+        // 模板配置
+        generator.template(templateConfig().build());
+        // 注入配置
+        generator.injection(injectionConfig().build());
+        // 策略配置
         generator.strategy(strategyConfig().build());
         generator.execute();
     }
@@ -17,7 +29,7 @@ public class CodeGenerator {
      * 数据源配置
      */
     private static final DataSourceConfig DATA_SOURCE_CONFIG = new DataSourceConfig
-            .Builder("jdbc:mysql://localhost:3306/mybatis_plus", "root", "Nriet@123")
+            .Builder("jdbc:mysql://localhost:3306/mybatis_plus", "root", "123456")
             .build();
 
     /**
@@ -48,7 +60,20 @@ public class CodeGenerator {
      */
     protected static PackageConfig.Builder packageConfig() {
         return new PackageConfig.Builder()
-                
+                // 父包名
+                .parent("com.time.trip.mybatisplus")
+                // Entity包名，entity、mapper一般放在infrastructure层或do层
+                .entity("infrastructure.entity")
+                // Service 包名
+                .service("service")
+                // Service Impl 包名
+                .serviceImpl("service.impl")
+                // Mapper 包名
+                .mapper("infrastructure.mapper")
+                // Mapper XML 包名，一般我会选择不生成，对应有自定义sql的需求，就以Ext的命名形式在resources目录下定义
+//                .xml("infrastructure.mapper.xml")
+                // Controller 包名
+                .controller("controller")
                 ;
     }
 
@@ -56,7 +81,10 @@ public class CodeGenerator {
      * 模板配置
      */
     protected static TemplateConfig.Builder templateConfig() {
-        return new TemplateConfig.Builder();
+        return new TemplateConfig.Builder()
+                // 禁用XML模版，即不生成xml文件
+                .disable(TemplateType.XML)
+                ;
     }
 
     /**
@@ -73,7 +101,25 @@ public class CodeGenerator {
      * 策略配置
      */
     protected static StrategyConfig.Builder strategyConfig() {
-        return new StrategyConfig.Builder();
+        StrategyConfig.Builder builder = new StrategyConfig.Builder()
+                // 增加过滤表前缀
+                .addTablePrefix("m_", "s_", "op_", "f_", "d_", "n_", "a_", "b_", "hn_", "hb_", "r_", "t_");
+        // Entity 策略配置
+        builder.entityBuilder()
+                // 开启 lombok 模型
+                .enableLombok()
+                // 数据库表映射到实体的命名策略，默认下划线转驼峰命名
+                .naming(NamingStrategy.underline_to_camel)
+                // 格式化文件名称
+                .formatFileName("%sDO")
+                // 设置父类，将公共字段抽象到父类中
+                .superClass(BaseEntity.class)
+                // 添加父类公共字段
+                .addSuperEntityColumns("id", "gmt_create", "create_id", "gmt_modify", "modify_id", "is_deleted")
+                // 覆盖已生成文件，一般entity选择覆盖，及时更新新增/变更的字段
+                .enableFileOverride()
+        ;
+        return builder;
     }
 
 }
