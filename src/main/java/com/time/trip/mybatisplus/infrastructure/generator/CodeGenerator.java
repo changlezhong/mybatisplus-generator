@@ -103,7 +103,8 @@ public class CodeGenerator {
     protected static StrategyConfig.Builder strategyConfig() {
         StrategyConfig.Builder builder = new StrategyConfig.Builder()
                 // 增加过滤表前缀
-                .addTablePrefix("m_", "s_", "op_", "f_", "d_", "n_", "a_", "b_", "hn_", "hb_", "r_", "t_");
+                .addTablePrefix("m_", "s_", "op_", "f_", "d_", "n_", "a_", "b_", "hn_", "hb_", "r_", "t_")
+                .addInclude(getTables(scanner()));
         // Entity 策略配置
         builder.entityBuilder()
                 // 开启 lombok 模型
@@ -120,6 +121,23 @@ public class CodeGenerator {
                 .enableFileOverride()
         ;
         return builder;
+    }
+
+    // 处理 all 情况
+    protected static List<String> getTables(String tables) {
+        return "all".equals(tables) ? Collections.emptyList() : Arrays.asList(tables.split(","));
+    }
+
+    public static String scanner() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入表名，多个英文逗号分隔？所有输入 all");
+        if (scanner.hasNext()) {
+            String ipt = scanner.next();
+            if (StringUtils.isNotBlank(ipt)) {
+                return ipt;
+            }
+        }
+        return "";
     }
 
 }
